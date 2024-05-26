@@ -1,0 +1,177 @@
+#include <stdio.h>
+
+#define SIZE 3
+
+char board[SIZE][SIZE];
+
+// Function to print the Tic Tac Toe board
+void printBoard() {
+    printf("-------------\n");
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            printf("| %c ", board[i][j]);
+        }
+        printf("|\n-------------\n");
+    }
+}
+
+// Function to check if the current player wins
+int isWinner(char player) {
+    // Check rows and columns
+    for (int i = 0; i < SIZE; i++) {
+        if ((board[i][0] == player && board[i][1] == player && board[i][2] == player) ||
+            (board[0][i] == player && board[1][i] == player && board[2][i] == player)) {
+            return 1;
+        }
+    }
+
+    // Check diagonals
+    if ((board[0][0] == player && board[1][1] == player && board[2][2] == player) ||
+        (board[0][2] == player && board[1][1] == player && board[2][0] == player)) {
+        return 1;
+    }
+
+    return 0;
+}
+
+// Function to check if the board is full
+int isBoardFull() {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] == ' ') {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+// Function to evaluate the current state of the board
+int evaluate() {
+    if (isWinner('X')) {
+        return 1;  // Player X wins
+    } else if (isWinner('O')) {
+        return -1; // Player O wins
+    } else if (isBoardFull()) {
+        return 0;  // It's a draw
+    }
+    return -2; // Game is still ongoing
+}
+
+// Minimax function
+int minimax(int depth, int isMax) {
+    int score = evaluate();
+
+    if (score != -2) {
+        return score;
+    }
+
+    if (isMax) {
+        int best = -1000;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = 'X';
+                    best = (best > minimax(depth + 1, !isMax)) ? best : minimax(depth + 1, !isMax);
+                    board[i][j] = ' ';
+                }
+            }
+        }
+        return best;
+    } else {
+        int best = 1000;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = 'O';
+                    best = (best < minimax(depth + 1, !isMax)) ? best : minimax(depth + 1, !isMax);
+                    board[i][j] = ' ';
+                }
+            }
+        }
+        return best;
+    }
+}
+
+// Function to find the best move using Minimax
+void findBestMove() {
+    int bestVal = -1000; 
+    int bestMoveRow = -1;
+    int bestMoveCol = -1;
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] == ' ') {
+                board[i][j] = 'X';
+                int moveVal = minimax(0, 0);
+                board[i][j] = ' ';
+
+                if (moveVal > bestVal) {
+                    bestMoveRow = i;
+                    bestMoveCol = j;
+                    bestVal = moveVal;
+                }
+            }
+        }
+    }
+
+    printf("The best move is: (%d, %d)\n", bestMoveRow, bestMoveCol);
+    board[bestMoveRow][bestMoveCol] = 'X';
+}
+
+int main() {
+    // Initialize the board
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            board[i][j] = ' ';
+        }
+    }
+
+    // Play the game
+    while (1) {
+        printBoard();
+
+        // Player's move
+        int row, col;
+        printf("Enter your move (row and column, separated by space): ");
+        scanf("%d %d", &row, &col);
+
+        if (board[row][col] == ' ') {
+            board[row][col] = 'O';
+        } else {
+            printf("Invalid move. Try again.\n");
+            continue;
+        }
+
+        printBoard();
+
+        // Check if the player wins
+        if (isWinner('O')) {
+            printf("Congratulations! You win!\n");
+            break;
+        }
+
+        // Check if it's a draw
+        if (isBoardFull()) {
+            printf("It's a draw!\n");
+            break;
+        }
+
+        // AI's move
+        findBestMove();
+
+        // Check if the AI wins
+        if (isWinner('X')) {
+            printf("Sorry, you lose. Better luck next time!\n");
+            break;
+        }
+
+        // Check if it's a draw
+        if (isBoardFull()) {
+            printf("It's a draw!\n");
+            break;
+        }
+    }
+
+    return 0;
+}
