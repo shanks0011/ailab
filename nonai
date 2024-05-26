@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+char Board[3][3];
+
+void initBoard(){
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            Board[i][j] = ' ';
+        }
+    }
+} 
+
+void printBoard(){
+    for (int i = 0; i < 3; i++) {
+        for(int j=0; j<3; j++){
+            printf("| %c |",Board[i][j]);
+        }
+        printf("\n");
+    }
+    // printf("\n");
+}
+
+bool tie(){
+    for (int i = 0; i < 3; i++) {
+        for(int j=0; j<3; j++){
+            if(Board[i][j]==' ')
+            return false;
+        }
+    }
+    return true;
+}
+
+bool checkwin(char player){
+    
+    // check row and col
+    for(int i=0; i<3; i++){
+        if((Board[i][0]==player && Board[i][1]== player && Board[i][2]== player)||
+          (Board[0][i]==player && Board[1][i]== player && Board[2][i]== player)){
+            return true;
+        }
+    }
+    
+    // Check diag
+    if((Board[0][0]==player && Board[1][1]== player && Board[2][2]== player)||
+      (Board[0][2]==player && Board[1][1]== player && Board[2][0]== player)){
+            return true;
+    }
+    
+    return false;
+}
+
+void Move(int row, int col, char player){
+    if(row>=0 && row<3 && col>=0 && col<3 && Board[row][col]==' '){
+        Board[row][col]=player;
+    }
+}
+
+
+
+void comp(char player){
+    // winning Move
+    for(int i=0; i<3; i++){
+        for(int j=0; j<3; j++){
+            if(Board[i][j]==' '){
+                Board[i][j]=player;
+                if(checkwin(player)){
+                    return;
+                }
+                Board[i][j]=' ';
+            }
+        }
+    }
+    
+    
+    // Block opp win
+    char opp = (player=='O') ? 'X' : 'O';
+    for(int i=0; i<3; i++){
+        for(int j=0; j<3; j++){
+            if(Board[i][j]==' '){
+                Board[i][j]=opp;
+                if(checkwin(opp)){
+                    Board[i][j]=player;
+                    return;
+                }
+                Board[i][j]=' ';
+            }
+        }
+    }
+    
+    // no winning Move
+    int row, col;
+    do{
+        row = rand() % 3;
+        col = rand() % 3;
+    }while(Board[row][col] !=' ');
+    
+    Board[row][col] = player;
+}
+
+int main(){
+    
+    initBoard();
+    
+    char player = 'X';
+    bool win = false;
+    
+    int row, col;
+    
+    printf("\nWelcome to TIC TAC TOE!!");
+    printf("\nShru-X, Comp-O\n");
+    
+    while(!win && !tie()){
+        printBoard();
+        
+        if(player=='X'){
+            printf("\nEnter row and col for 'X': ");
+            scanf("%d %d",&row, &col);
+            Move(row, col, player);
+            // if(0<=row<3 && 0<=col<3 && Board[row][col]==' '){
+                // Move(row, col, player);
+            // }
+            // else{
+            //     printf("\nInvalid row and col! Enter again!")
+            // }
+        } 
+        else{
+            printf("\nComp turn \n");
+            comp(player);
+        }
+        if(checkwin(player)){
+            printf("\nPlayer %c wins!!\n",player);
+            win=true;
+        }
+        else
+        {
+            player=(player=='X') ? 'O' : 'X';
+        }
+    }
+    
+    if(!win){
+        printf("\nIts a tie!!\n");
+    }
+        
+    printBoard();
+
+    return 0;
+}
