@@ -1,0 +1,83 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<pair<int,int>> getNextStates(pair<int,int> curr, pair<int,int> &capacity){
+    int x = curr.first;
+    int y = curr.second;
+    vector<pair<int,int>> nextStates;
+
+    // fill 1st capacity glass
+    nextStates.push_back({capacity.first, y});
+
+    // fill 2nd capcity glass
+    nextStates.push_back({x, capacity.second});
+
+    // empty 1st capcity glass
+    nextStates.push_back({0, y});
+
+    // empty 2nd capcity glass
+    nextStates.push_back({x, 0});
+
+    // pour water from 2nd capcity to first capcity
+    if(x+y>=capacity.first){
+        nextStates.push_back({capacity.first, y-(capacity.first-x)});
+    }else{
+        nextStates.push_back({x+y, 0});
+    }
+
+    // pour water from 1st capcity to second capacity
+    if((x+y) >=capacity.second){
+        nextStates.push_back({x-(capacity.second-y) ,capacity.second});
+    }else{
+        nextStates.push_back({0, x+y});
+    }
+    return nextStates;
+}
+
+bool bfs(pair<int,int> start, pair<int,int> end, vector<pair<int,int>> &path, pair<int,int> &capacity){
+    queue<pair<pair<int,int>, vector<pair<int,int>>>> q;
+    set<pair<int,int>> visited;
+    q.push({start, {start}});
+    visited.insert(start);
+
+    while(!q.empty()){
+        pair<int,int> curr = q.front().first;
+        vector<pair<int,int>> currPath = q.front().second;
+        q.pop();
+
+        if(curr==end){
+            path = currPath;
+            return true;
+        }
+
+        vector<pair<int,int>> nextStates = getNextStates(curr, capacity);
+
+        for(pair<int,int> next :nextStates){
+            if(visited.find(next) == visited.end()){
+                visited.insert(next);
+                vector<pair<int,int>> newPath = currPath;
+                newPath.push_back(next);
+                q.push({next, newPath});
+            }
+        }
+    }
+    return false;
+}
+
+
+int main(){
+    pair<int,int> start = {0,0};
+    pair<int,int> goal = {2, 0};
+    pair<int,int> capacity = {4, 3};
+    vector<pair<int,int>> path;
+
+    if(bfs(start, goal, path, capacity)){
+        cout << "Possible Soluion is : " << endl;
+        for(pair<int,int> it: path){
+            cout << "( " << it.first << " , " << it.second << " )" << endl;
+        } 
+    }else{
+        cout << "No possble solution Exits" << endl;
+    }
+    return 0;
+}
